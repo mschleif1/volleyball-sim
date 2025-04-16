@@ -1,0 +1,48 @@
+/* LandingPage.css */
+
+.container {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background-color);
+  }
+  
+  .landing-box {
+    background-color: var(--primary-color);
+    border: 4px solid var(--border-color);
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 0 10px #000;
+  }
+  
+  .pixelated {
+    font-family: var(--font-family);
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px #000;
+  }
+  
+  input.pixelated {
+    width: 80%;
+    padding: 0.75rem;
+    background-color: var(--accent-color);
+    border: 2px solid var(--border-color);
+    color: #000;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  button.pixelated {
+    background-color: var(--accent-color);
+    padding: 0.75rem 2rem;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  button.pixelated:hover {
+    background-color: #ffee33;
+  }

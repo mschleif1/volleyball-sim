@@ -1,0 +1,43 @@
+.full-page {
+    height: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    background-color: #f5f5dc;
+    overflow-y: auto;
+}
+
+.page-header {
+	background-color: #ffa500;
+	padding: 1rem;
+	text-align: center;
+	width: 100%;
+	border-bottom: 2px solid #222;
+}
+
+.summary, .players-section {
+	width: 100%;
+	max-width: 800px;
+	text-align: left;
+	margin: 1rem auto;
+}
+
+.summary {
+	font-size: 12px;
+}
+
+.players-section {
+	flex: 1;
+	width: 100%;
+	max-width: 800px;
+}
+
+.pixelated {
+	font-family: 'Press Start 2P', monospace;
+}
+
+.team-section{
+    margin-top:1rem;
+}
