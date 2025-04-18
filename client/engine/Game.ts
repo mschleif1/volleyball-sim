@@ -1,6 +1,7 @@
 import { Team } from './Team';
-import { IncomingBall } from "./IncomingBall"
-
+//import { IncomingBall } from "./IncomingBall"
+import { GameStats } from "./GameStats"
+import { Player } from "./Player"
 const SETS_PER_GAME = 3
 const POINTS_PER_SET = 25
 
@@ -9,15 +10,20 @@ export class Game {
 	team2: Team;
     currentSet: number;
     setScores: { [key: number]: number }[];  // Array of objects to store the scores for each set
+    gameStats: GameStats
+    id: string
 
-
-	constructor(team1: Team, team2: Team) {
+    // need to pass in the id because it is dependent on the schedule...
+	constructor(team1: Team, team2: Team, id: string) {
 		this.team1 = team1;
 		this.team2 = team2;
 		
         
         this.currentSet = 0;
         this.setScores = [];
+        this.gameStats = new GameStats()
+        
+        this.id = id
 	}
 
     getTeam(teamId: number): Team {
@@ -39,12 +45,17 @@ export class Game {
 
         let teamWithBall = winningTeamId == this.team1.id ? this.team1: this.team2
         let teamWithoutBall = winningTeamId == this.team1.id ? this.team2: this.team1
-        
+
         let server = teamWithBall.currentServer()
         let incomingBall = server.simulateServe()
-        incomingBall.updateHistory()
+
         
+        let temp = teamWithBall
+        teamWithBall = teamWithoutBall
+        teamWithoutBall = temp
+
         if (verbose){
+            console.log(teamWithBall)
             console.log("======NEW POINT=====")
             console.log("SERVING")
             if (incomingBall.inPlay){
@@ -70,13 +81,26 @@ export class Game {
             let temp = teamWithBall
             teamWithBall = teamWithoutBall
             teamWithoutBall = temp
-            incomingBall.updateHistory()
         }
 
 
-        
+        if (verbose){
+            console.log("WINNING TEAM", teamWithoutBall.id)
+        }
+
+        this.gameStats.recordBallHistory(incomingBall.history)
         return teamWithoutBall.id
     }
+
+    recordStats(pointHistory: Object[]){
+        // create some kind of record of the points
+
+        // Player stats ==>
+        /*
+        create new stats for the player, and for the season
+        */
+    }
+
 
     // Simulate a single set and return the winning team
 	playSet(): number {
@@ -90,7 +114,7 @@ export class Game {
         let scoreDifference = Math.abs(currentSetScores[this.team1.id] - currentSetScores[this.team2.id])
         while ((currentSetScores[this.team1.id] < POINTS_PER_SET && currentSetScores[this.team2.id] < POINTS_PER_SET) || scoreDifference < 2) {
             winningTeam = this.playPoint(winningTeam, true)
-            console.log(winningTeam)
+            console.log("Winning Team:", winningTeam, currentSetScores)
             currentSetScores[winningTeam] += 1
 
             if (this.team1.id == winningTeam){
@@ -131,6 +155,12 @@ export class Game {
         }
         console.log(t1SetsWon, t2SetsWon)
         console.log(this.setScores)
+
+        console.log("GAME STATS YEAH")
+        console.log("GAME STATS YEAH")
+        console.log("GAME STATS YEAH")
+        console.log("GAME STATS YEAH")
+        console.log(this.gameStats)
         if (t1SetsWon > t2SetsWon){
             return this.team1.id
         } else {
@@ -138,4 +168,8 @@ export class Game {
         }
 
 	}
+
+    static createGameId(team1: number, team2: number, weekNumber: number): string {
+        return `${team1}-${team2}-${weekNumber}`
+    }
 }

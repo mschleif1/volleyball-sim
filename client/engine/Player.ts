@@ -72,7 +72,10 @@ export class Player {
 		// Serve is successful, calculate speed
 		const maxSpeed = MAX_SPEED;
 		const speed = Math.round((this.power / 100) * maxSpeed + Math.random() * 5); // small randomness
-		return new IncomingBall(speed, true, "serve", this.id)
+		let incomingBall = new IncomingBall(speed, true, "serve", this.id)
+
+		incomingBall.updateHistory()
+		return incomingBall
 	}
 
 	passBall(incomingBall: IncomingBall): void{
@@ -98,6 +101,7 @@ export class Player {
 		}
 		incomingBall.type = "pass"
 		incomingBall.playerId = this.id
+		incomingBall.updateHistory()
 	}
 
 	setBall(incomingBall: IncomingBall): void{
@@ -128,6 +132,7 @@ export class Player {
 			incomingBall.inPlay = false 
 		}
 		incomingBall.playerId = this.id
+		incomingBall.updateHistory()
 	}
 
 	spikeBall(incomingBall: IncomingBall): void {
@@ -178,12 +183,13 @@ export class Player {
 		incomingBall.speed = Math.round(baseSpeed);
 		incomingBall.type = "spike";
 		incomingBall.playerId = this.id
+		incomingBall.updateHistory()
 	}
 	static rehydrate(jsonData: string): Player{
 		const playerAttributes = JSON.parse(jsonData)
 		return new Player(
 			playerAttributes.name, playerAttributes.position, playerAttributes.id, playerAttributes.jumping, playerAttributes.passing,
-	  		playerAttributes.power, playerAttributes.consistency, playerAttributes, playerAttributes.blocking, playerAttributes.bumping, 
+	  		playerAttributes.power, playerAttributes.consistency, playerAttributes.setting, playerAttributes.blocking, playerAttributes.bumping, 
 			playerAttributes.teamId
 		)
 	}

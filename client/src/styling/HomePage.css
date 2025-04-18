@@ -7,37 +7,58 @@
     box-sizing: border-box;
     background-color: #f5f5dc;
     overflow-y: auto;
+    color: #111; /* Universal dark text */
 }
 
 .page-header {
-	background-color: #ffa500;
-	padding: 1rem;
-	text-align: center;
-	width: 100%;
-	border-bottom: 2px solid #222;
+    background-color: #ff9933;
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    border-bottom: 2px solid #222;
+    color: #111;
 }
 
-.summary, .players-section {
-	width: 100%;
-	max-width: 800px;
-	text-align: left;
-	margin: 1rem auto;
+.summary,
+.players-section {
+    width: 100%;
+    max-width: 800px;
+    text-align: left;
+    margin: 1rem auto;
+    background-color: rgba(240, 240, 240, 0.95);
+    padding: 1rem;
+    border-radius: 8px;
+	/* box-shadow: 2px 2px 0 #aaa; */
+    color: #111;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 }
 
 .summary {
-	font-size: 12px;
+    font-size: 12px;
 }
 
 .players-section {
-	flex: 1;
-	width: 100%;
-	max-width: 800px;
+    flex: 1;
 }
 
 .pixelated {
-	font-family: 'Press Start 2P', monospace;
+    font-family: 'Press Start 2P', monospace;
+    color: #111;
+    font-size: 12px;
+    line-height: 1.6;
+    text-shadow: none;
 }
 
-.team-section{
-    margin-top:1rem;
+h1,
+h2,
+h3 {
+    color: #111;
+    text-shadow: none;
+}
+
+.team-section {
+    margin-top: 1rem;
+    color: #111;
 }

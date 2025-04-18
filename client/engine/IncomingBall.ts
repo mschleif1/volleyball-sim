@@ -1,11 +1,17 @@
 import { Team } from './Team';
 
+export type Ball = {
+	speed: number;
+	inPlay: boolean;
+	type: string; // 'serve', 'pass', 'set', 'spike', etc.
+	playerId: number;
+};
 
 export class IncomingBall {
 	speed: number;
 	inPlay: boolean;
     type: string;
-    history: object[];
+    history: Ball[];
     playerId: number;
 
 

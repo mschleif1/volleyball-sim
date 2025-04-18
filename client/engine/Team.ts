@@ -147,4 +147,17 @@ export class Team {
 			teamAttributes.name, teamAttributes.playerIds, teamAttributes.id, teamAttributes.userTeam
 		)
     }
+
+    static findTeam(teams: Team[], id: number): Team {
+        let targetTeam = null
+        teams.forEach(team=>{
+            if (team.id == id){
+                targetTeam = team
+            }
+        })
+        if (!targetTeam){
+            throw new Error("NO TEAM IN COLLECTION")
+        }
+        return targetTeam!
+    }
 }

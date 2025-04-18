@@ -25,6 +25,7 @@ type Matchup = [number, number];
 import {Game} from "./Game"
 import {Team} from "./Team"
 import _ from "lodash"
+import { AppData } from "src/AppDataContext";
 
 export class Season {
 	teamIds: number[];
@@ -71,24 +72,29 @@ export class Season {
 		return schedule;
 	}
 
-	// simWeek(): void {
-	// 	if (this.currentWeek >= this.schedule.length) {
-	// 		console.log("All regular season weeks have been simulated.");
-	// 		return;
-	// 	}
+	simWeek(leagueData: AppData): void {
+		if (this.currentWeek >= this.schedule.length) {
+			console.log("All regular season weeks have been simulated.");
+			return;
+		}
+		
 
-	// 	const matchups = this.schedule[this.currentWeek];
-	// 	console.log(`Simulating Week ${this.currentWeek + 1}`);
-	// 	matchups.forEach(([home, away]) => {
-    //         let team1 = _.find(this.teams, team=> team.id === home)
-    //         let team2 = _.find(this.teams, team=> team.id === away)
-	// 		console.log(`Game: Team ${home} vs Team ${away}`);
-    //         let game = new Game(team1!, team2!)
-    //         game.playGame()
-	// 	});
+		const matchups = this.schedule[this.currentWeek];
+		console.log(`Simulating Week ${this.currentWeek + 1}`);
+		matchups.forEach(([homeId, awayId]) => {
+			let home = leagueData.teams[homeId]
+			let away = leagueData.teams[awayId]
 
-	// 	this.currentWeek += 1;
-	// }
+			home.setPlayersAndLineUp(leagueData.players)
+			away.setPlayersAndLineUp(leagueData.players)
+            
+			let game = new Game(home, away, Game.createGameId(homeId, awayId, this.currentWeek))
+            game.playGame()
+		});
+
+		// make this a state call
+		this.currentWeek += 1;
+	}
 
 	isSeasonOver(): boolean {
 		return this.currentWeek >= this.schedule.length;

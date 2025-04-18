@@ -1,40 +1,61 @@
 // AppDataContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { Player } from "../engine/Player"
-import { Team } from "../engine/Team"
-import { League } from "../engine/League"
-import { Season } from "../engine/Season"
+import { Player } from "../engine/Player";
+import { Team } from "../engine/Team";
+import { League } from "../engine/League";
+import { Season } from "../engine/Season";
 
-interface AppData {
-	players: Player[];
-	teams: Team[];
-	seasons: Season[];
+export interface AppData {
+	players: Record<string, Player>;
+	teams: Record<string, Team>;
+	seasons: Record<string, Season>;
 	league: League | null;
 }
 
 const AppDataContext = createContext<AppData | null>(null);
 
 export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [players, setPlayers] = useState<Player[]>([]);
-	const [teams, setTeams] = useState<Team[]>([]);
-	const [seasons, setSeasons] = useState<Season[]>([]);
-	const [league, setLeague] = useState<League | null> (null);
+	const [players, setPlayers] = useState<Record<string, Player>>({});
+	const [teams, setTeams] = useState<Record<string, Team>>({});
+	const [seasons, setSeasons] = useState<Record<string, Season>>({});
+	const [league, setLeague] = useState<League | null>(null);
 
 	useEffect(() => {
-        console.log("LOADING DATA!!!!")
-		// Load from localStorage and rehydrate here
-		const rawPlayers = JSON.parse(localStorage.getItem('players') || '[]');
-		setPlayers(rawPlayers.map(Player.rehydrate));
+		console.log("LOADING DATA!!!!");
 
-        const rawTeams = JSON.parse(localStorage.getItem('teams') || '[]');
-        setTeams(rawTeams.map(Team.rehydrate));
+		// Players
+		const rawPlayers = JSON.parse(localStorage.getItem('players') || '[]');
+		const rehydratedPlayers: Record<string, Player> = {};
+		rawPlayers.forEach((player: any) => {
+			const rehydrated = Player.rehydrate(player);
+			rehydratedPlayers[rehydrated.id] = rehydrated;
+		});
+		setPlayers(rehydratedPlayers);
+
+		// Teams
+		const rawTeams = JSON.parse(localStorage.getItem('teams') || '[]');
+		const rehydratedTeams: Record<string, Team> = {};
+		rawTeams.forEach((team: any) => {
+			const rehydrated = Team.rehydrate(team);
+			rehydratedTeams[rehydrated.id] = rehydrated;
+		});
+		setTeams(rehydratedTeams);
+
+		// Seasons
+		const rawSeasons = JSON.parse(localStorage.getItem('seasons') || '[]');
+		const rehydratedSeasons: Record<string, Season> = {};
+		rawSeasons.forEach((season: any) => {
+			const rehydrated = Season.rehydrate(season);
+			rehydratedSeasons[rehydrated.year] = rehydrated;
+		});
+		setSeasons(rehydratedSeasons);
+
+		// League
+		const rawLeague = localStorage.getItem('league') || '{}';
+		console.log(rawLeague)
 		
-        const rawSeasons = JSON.parse(localStorage.getItem('seasons') || '[]');
-        setSeasons(rawSeasons.map(Season.rehydrate));
-        
-        const rawLeague = localStorage.getItem('league') || "{}"
-        setLeague(League.rehydrate(rawLeague));
+		setLeague(League.rehydrate(rawLeague));
 	}, []);
 
 	return (

@@ -6,25 +6,67 @@ import '../styling/HomePage.css';
 const HomePage = () => {
 	const appData = useAppData();
 
-	if (!appData) {
+	if (!appData || !appData.league) {
 		return <div className="pixelated full-page">Loading...</div>;
 	}
 
 	const { league, seasons, teams, players } = appData;
-	const currentSeason = seasons[seasons.length - 1];
-	const userTeam = teams.find(t => t.userTeam);
+	
+	
+	const currentSeason = Object.values(seasons).at(-1);
+	const userTeam = Object.values(teams).find(t => t.userTeam);
+	const currentWeek = currentSeason!.currentWeek
+	
+	if (!currentSeason){
+		return <h1> No season </h1>
+	}
+	function playGame(){
+		currentSeason!.simWeek(appData)
+	}
+
+	function renderCurrentMatchup(){
+		if (!userTeam || !currentSeason){ return }
+
+		const currentMatchup = currentSeason.schedule[currentWeek].find((matchup)=> matchup[0] == userTeam.id || matchup[1] == userTeam.id)
+
+		const homeTeam = teams[currentMatchup![0]]
+		const awayTeam = teams[currentMatchup![1]]
+
+		return (
+			<> 
+				Next Matchup: {homeTeam.name} (home) vs. {awayTeam.name} (away)
+			</>
+		)
+	}
+
+	function renderPlayGamePanel(){
+		return (
+			<section className="summary">
+				<p><b>Season:</b> {currentSeason?.year ?? 'Unknown'}, week: {currentWeek + 1}</p>
+				<p>{renderCurrentMatchup()}</p>
+				<button className='pixelated small centered' onClick={()=>playGame()}> Play </button>
+			</section>
+		)
+	}
+
+
+
 	const teamPlayers = userTeam
-		? userTeam.playerIds.map(id => players.find(p => p.id === id)).filter(Boolean)
+		? userTeam.playerIds.map(id => players[id])
 		: [];
 
-	const columns = ['Name', 'Position', 'Power', 'Speed', 'Stamina'];
+	const columns = ['Name', 'Position','Power', 'Consistency', 'Set', 'Pass', 'Block'];
 	const data = (teamPlayers as any[]).map(p => [
 		p.name,
-		p.position?.toString() ?? '',
-		p.power?.toString() ?? '',
-		p.speed?.toString() ?? '',
-		p.stamina?.toString() ?? '',
+		p.position.toString(),
+		p.power.toString(),
+		p.consistency.toString(),
+		p.setting.toString(),
+		p.passing.toString(),
+		p.blocking.toString()
 	]);
+
+
 
 	return (
 		<div className="full-page pixelated">
@@ -36,10 +78,7 @@ const HomePage = () => {
                 <h2> {userTeam && userTeam.name}</h2>
             </section>
             
-			<section className="summary">
-				<p><b>Season:</b> {currentSeason?.year ?? 'Unknown'}</p>
-				<p><b>Next Matchup:</b> TBD vs. TBD</p>
-			</section>
+			{renderPlayGamePanel()}
 
 			<section className="players-section">
 				<h2>Your Players</h2>

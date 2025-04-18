@@ -25,7 +25,6 @@ export class League {
     }
 
 	static rehydrate(jsonData: string): League{
-		console.log(jsonData, "JSON DATA BABY")
 		const leagueAttributes = JSON.parse(jsonData)
 		return new League(leagueAttributes.currentSeasonYear)
 	
