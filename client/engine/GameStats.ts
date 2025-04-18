@@ -74,9 +74,6 @@ export class GameStats {
 	}
 
 	public recordBallHistory(balls: Ball[]): void {
-        console.log(balls, "GOT SOME BALLS HERE")
-        console.log(balls, "GOT SOME BALLS HERE")
-        console.log(balls, "GOT SOME BALLS HERE")
 		for (let i = 0; i < balls.length; i++) {
 			const ball = balls[i];
 			const nextBall = balls[i + 1];

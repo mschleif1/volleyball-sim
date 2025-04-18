@@ -31,9 +31,18 @@ export class Team {
 	// 	return new Team(data.name, players, data.id);
 	// }
 
-    rotateTeam(): void{
-
-        5+4
+    rotateTeam(): void {
+        const rotationOrder = [1, 6, 5, 4, 3, 2];
+        const newLineup: { [key: number]: any } = {};
+    
+        for (let i = 0; i < rotationOrder.length; i++) {
+            const currentPos = rotationOrder[i];
+            const previousIndex = (i + rotationOrder.length - 1) % rotationOrder.length;
+            const fromPos = rotationOrder[previousIndex];
+            newLineup[currentPos] = this.lineup[fromPos];
+        }
+    
+        this.lineup = newLineup;
     }
 
     currentServer(): Player{
@@ -48,7 +57,7 @@ export class Team {
 
         let receivingPlayer = this.lineup[receivingPos]
         receivingPlayer.passBall(incomingBall)
-        
+
         if (verbose){
             console.log(`${receivingPlayer.name} passed with: ${incomingBall.speed} quality`)
         }

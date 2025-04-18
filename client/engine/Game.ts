@@ -113,15 +113,19 @@ export class Game {
         let winningTeam = (this.currentSet % 2 === 1) ? this.team2.id : this.team1.id;
         let scoreDifference = Math.abs(currentSetScores[this.team1.id] - currentSetScores[this.team2.id])
         while ((currentSetScores[this.team1.id] < POINTS_PER_SET && currentSetScores[this.team2.id] < POINTS_PER_SET) || scoreDifference < 2) {
-            winningTeam = this.playPoint(winningTeam, true)
+            let newWinningTeam = this.playPoint(winningTeam, true)
             console.log("Winning Team:", winningTeam, currentSetScores)
             currentSetScores[winningTeam] += 1
-
-            if (this.team1.id == winningTeam){
-                this.team1.rotateTeam()
-            } else {
-                this.team2.rotateTeam()
+            
+            // if the recieving team won the point again, rotate them.
+            if (newWinningTeam != winningTeam){
+                if (this.team1.id == newWinningTeam){
+                    this.team1.rotateTeam()
+                } else {
+                    this.team2.rotateTeam()
+                }
             }
+            winningTeam = newWinningTeam
 
             scoreDifference = Math.abs(currentSetScores[this.team1.id] - currentSetScores[this.team2.id])
         }
