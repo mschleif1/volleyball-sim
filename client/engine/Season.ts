@@ -26,6 +26,7 @@ import {Game} from "./Game"
 import {Team} from "./Team"
 import _ from "lodash"
 import { AppData } from "src/AppDataContext";
+import { GameStats } from "./GameStats";
 
 export class Season {
 	teamIds: number[];
@@ -34,14 +35,19 @@ export class Season {
 	currentWeek: number;
 	playoffSchedule: Matchup[][];
 
-	constructor(teamIds: number[], year: number) {
+	constructor(teamIds: number[], year: number, currentWeek?: number ) {
 		if (teamIds.length !== 10) {
 			throw new Error("Season must be initialized with exactly 10 teams.");
 		}
 
 		this.teamIds = teamIds;
 		this.year = year;
-		this.currentWeek = 0;
+		if (currentWeek){
+
+			this.currentWeek = currentWeek;
+		} else {
+			this.currentWeek = 0
+		}
 		this.schedule = this.generateSchedule(teamIds);
 		this.playoffSchedule = [];
 	}
@@ -72,12 +78,12 @@ export class Season {
 		return schedule;
 	}
 
-	simWeek(leagueData: AppData): void {
+	simWeek(leagueData: AppData): GameStats[] {
 		if (this.currentWeek >= this.schedule.length) {
 			console.log("All regular season weeks have been simulated.");
-			return;
+			return [];
 		}
-		
+		let gameResults: GameStats[] = []
 
 		const matchups = this.schedule[this.currentWeek];
 		console.log(`Simulating Week ${this.currentWeek + 1}`);
@@ -89,11 +95,10 @@ export class Season {
 			away.setPlayersAndLineUp(leagueData.players)
             
 			let game = new Game(home, away, Game.createGameId(homeId, awayId, this.currentWeek))
-            game.playGame()
+            gameResults.push(game.playGame())
 		});
 
-		// make this a state call
-		this.currentWeek += 1;
+		return gameResults
 	}
 
 	isSeasonOver(): boolean {
@@ -111,7 +116,7 @@ export class Season {
 		
 		const seasonAttributes = JSON.parse(jsonData)
 		return new Season(
-			seasonAttributes.teamIds, seasonAttributes.year
+			seasonAttributes.teamIds, seasonAttributes.year, seasonAttributes.currentWeek
 		)
 	
 	}

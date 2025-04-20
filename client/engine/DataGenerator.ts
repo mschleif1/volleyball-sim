@@ -2,7 +2,7 @@ import { Player } from './Player';
 import { Team } from "./Team"
 import { League } from "./League"
 import { Season } from "./Season"
-import { saveLeague } from './DataManager';
+import { saveGame } from './DataManager';
 
 import _ from "lodash"
 
@@ -89,8 +89,7 @@ const firstNames = [
 	"Teresa",
 	"Daniel",
 	"Quentin",
-	"Seamus",
-	"Lebron"
+	"Seamus"
 ];
 
 const lastNames = [
@@ -178,26 +177,26 @@ export const generateLeagueTeams = (userTeamName: string): Team[] => {
 
 type LeagueBundle = {
 	league: League;
-	teams: Team[];
-	players: Player[];
-	season: Season;
+	teams: Record<number, Team>;
+	players: Record<number, Player>;
+	seasons: Record<number, Season>;
 };
 
 export const generateLeague = (playerTeamName: string): LeagueBundle => {	
 	let playerIdCounter = 0;
 	let teamIdCounter = 0;
 
-	let players = []
+	let players: Record<number, Player> = {}
 	while (playerIdCounter < PLAYER_LEAGUE_COUNT){
-		players.push(generatePlayer(playerIdCounter ++))
+		players[playerIdCounter] = generatePlayer(playerIdCounter ++)
 		
 	}
 	
-	let teams = []
+	let teams: Record<number, Team> = {}
 	while (teamIdCounter < TEAM_LEAGUE_COUNT - 1){
-		teams.push(generateTeam("", teamIdCounter ++))
+		teams[teamIdCounter] = generateTeam("", teamIdCounter ++)
 	}
-	teams.push(generateTeam(playerTeamName, teamIdCounter))
+	teams[teamIdCounter] = generateTeam(playerTeamName, teamIdCounter)
 	
 	// Connect the teams and players
 	let teamsFilled = 0
@@ -215,15 +214,14 @@ export const generateLeague = (playerTeamName: string): LeagueBundle => {
 	
 	let league = new League(2025)
 
-	let season = new Season(teams.map(team=> team.id), 2025)
-	
-	// save the league to local storage
-	saveLeague(league, teams, players, [season])
+	let season = new Season(Object.keys(teams).map((k)=>Number(k)), 2025)
+	const seasons = {2025: season}
+
 
 	return {
 		league,
 		teams,
 		players,
-		season,
+		seasons,
 	}
 }

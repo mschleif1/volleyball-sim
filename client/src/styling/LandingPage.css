@@ -20,7 +20,7 @@
   
   .pixelated {
     font-family: var(--font-family);
-    color: var(--text-color);
+    
     margin-bottom: 1rem;
     /* text-shadow: 1px 1px #000; */
   }

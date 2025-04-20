@@ -21,7 +21,7 @@ export class Game {
         
         this.currentSet = 0;
         this.setScores = [];
-        this.gameStats = new GameStats()
+        this.gameStats = new GameStats(id)
         
         this.id = id
 	}
@@ -142,7 +142,7 @@ export class Game {
     
 
 	// Simulate a full game with 5 sets max
-	playGame(): number {
+	playGame(): GameStats {
 		
         let t1SetsWon = 0
         let t2SetsWon = 0
@@ -165,15 +165,29 @@ export class Game {
         console.log("GAME STATS YEAH")
         console.log("GAME STATS YEAH")
         console.log(this.gameStats)
+        
+        this.gameStats.setScores = this.setScores
+        
         if (t1SetsWon > t2SetsWon){
-            return this.team1.id
+            this.gameStats.winningTeamId = this.team1.id
+            
         } else {
-            return this.team2.id
+            this.gameStats.winningTeamId = this.team2.id
         }
+
+        return this.gameStats
 
 	}
 
     static createGameId(team1: number, team2: number, weekNumber: number): string {
         return `${team1}-${team2}-${weekNumber}`
+    }
+
+    static getTeamIdsFromGameId(id: string): number[]{
+        let ids = id.split("-")
+        if (ids.length != 3){
+            throw new Error("ID NOT FORMATTED RIGHT")
+        }
+        return [parseInt(ids[0]), parseInt(ids[1])]
     }
 }

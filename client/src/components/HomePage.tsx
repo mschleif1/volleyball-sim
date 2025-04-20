@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppData } from '../AppDataContext';
 import PixelTable from './PixelTable';
 import '../styling/HomePage.css';
-
+import GamePanel  from "./GamePanel"
 const HomePage = () => {
 	const appData = useAppData();
 
@@ -41,10 +41,8 @@ const HomePage = () => {
 
 	function renderPlayGamePanel(){
 		return (
-			<section className="summary">
-				<p><b>Season:</b> {currentSeason?.year ?? 'Unknown'}, week: {currentWeek + 1}</p>
-				<p>{renderCurrentMatchup()}</p>
-				<button className='pixelated small centered' onClick={()=>playGame()}> Play </button>
+			<section>
+				{<GamePanel/>}
 			</section>
 		)
 	}
@@ -81,7 +79,7 @@ const HomePage = () => {
 			{renderPlayGamePanel()}
 
 			<section className="players-section">
-				<h2>Your Players</h2>
+				<h2>Roster</h2>
 				{teamPlayers.length > 0 ? (
 					<PixelTable columns={columns} data={data} />
 				) : (

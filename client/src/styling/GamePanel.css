@@ -1,0 +1,13 @@
+.set-scores {
+    border-collapse: collapse;
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+    font-family: monospace;
+}
+
+.set-scores th,
+.set-scores td {
+    border: 1px solid black;
+    padding: 4px 8px;
+}
