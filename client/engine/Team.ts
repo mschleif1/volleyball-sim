@@ -6,12 +6,12 @@ import assert from 'assert';
 export class Team {
 	name: string;
 	playerIds: number[] ;
-    id: number;
+    id: string;
     lineup: { [key: number]: Player };  
     userTeam: boolean;
     players: Player[];
 
-	constructor(name: string, playerIds: number[], id: number, userTeam: boolean) {
+	constructor(name: string, playerIds: number[], id: string, userTeam: boolean) {
 		this.name = name;
 		this.playerIds = playerIds;
         this.id = id
@@ -155,18 +155,5 @@ export class Team {
 		return new Team(
 			teamAttributes.name, teamAttributes.playerIds, teamAttributes.id, teamAttributes.userTeam
 		)
-    }
-
-    static findTeam(teams: Team[], id: number): Team {
-        let targetTeam = null
-        teams.forEach(team=>{
-            if (team.id == id){
-                targetTeam = team
-            }
-        })
-        if (!targetTeam){
-            throw new Error("NO TEAM IN COLLECTION")
-        }
-        return targetTeam!
     }
 }

@@ -1,7 +1,7 @@
 // GameStats.ts
 
 import { PlayerStats } from './PlayerStats';
-
+import { isEmpty } from 'lodash';
 export type Ball = {
 	speed: number;
 	inPlay: boolean;
@@ -12,7 +12,7 @@ export type Ball = {
 export class GameStats {
 	public playerStats: Record<string, PlayerStats> = {};
 	public setScores: { [key: number]: number }[] = [];
-	public winningTeamId: number | null = null;
+	public winningTeamId: string | null = null;
 	public id: string;
 
 	constructor(id: string) {
@@ -74,5 +74,31 @@ export class GameStats {
 			winningTeamId: this.winningTeamId,
 			id: this.id,
 		};
+	}
+
+	static getRecord(teamId: string, gameStats: Record<string, GameStats>): string  {
+		if (!gameStats || isEmpty(gameStats) || !teamId){ return "0-0" }
+	
+
+		let wins = 0
+		let losses = 0
+		Object.keys(gameStats).forEach(id=>{
+			const teamIds = id.split("-")
+			if (teamIds[0] == teamId || teamIds[1] == teamId){
+				console.log("RELEVANT GAME HERE!!!")
+				console.log(gameStats[id])
+				if (gameStats[id].winningTeamId == teamId){
+					wins ++
+				} else {
+					losses ++
+				}
+			}
+		})
+
+		if (wins + losses == 0) {
+			throw new Error("TEAM NOT IN HERE...")
+		}
+
+		return `${wins}-${losses}`
 	}
 }

@@ -13,11 +13,11 @@ export class Player {
 	blocking: number;
 	bumping: number;
 	passing: number;
-	teamId: number | null;
+	teamId: string | null;
   
 	constructor(
 	  name: string, position: string, id: number, jumping: number, passing: number,
-	  power: number, consistency: number,setting: number, blocking: number, bumping: number, teamId: number | null
+	  power: number, consistency: number,setting: number, blocking: number, bumping: number, teamId: string | null
 	) {
 		this.name = name;
 		this.id = id;

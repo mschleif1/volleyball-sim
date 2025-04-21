@@ -160,7 +160,7 @@ export const generateTeam = (teamName: string, teamIndex: number): Team => {
 	const name = teamName ? teamName : _.sample(teamNames)!;
 	const isUserTeam = teamName ? true : false 
 	
-	return new Team(name, [], teamIndex, isUserTeam);
+	return new Team(name, [], teamIndex.toString(), isUserTeam);
 };
 
 export const generateLeagueTeams = (userTeamName: string): Team[] => {

@@ -141,14 +141,48 @@ const GamePanel: React.FC = () => {
 
 	// --- Render ---
 	return (
-		<section className="summary">
-			<h2>Current Week</h2>
-			<p><b>Season:</b> {currentSeason?.year ?? 'Unknown'}, week: {currentWeek + 1}</p>
-			<p>{renderCurrentMatchup()}</p>
-			<button className='pixelated small centered' onClick={playGame}>Play</button>
+		<div className="game-panel-wrapper pixelated">
+			<header className="game-header">
+				<h3 className="season-subtitle">Season: {currentSeason?.year ?? 'Unknown'}, Week: {currentWeek + 1}</h3>
+			</header>
+	
+			<div className="info-panels">
+				<section className="past-results summary">
+					<h3>Past Results</h3>
+					<ul>
+						<li>Week 1: Jackopepes 2 - 1 Ballers</li>
+						<li>Week 1: Smash Bros 0 - 2 Diggers</li>
+					</ul>
+				</section>
+	
+				<section className="standings summary">
+					<h3>Standings</h3>
+					<table className="pixelated-table">
+						<thead>
+							<tr>
+								<th>Team</th>
+								<th>W</th>
+								<th>L</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>Jackopepes</td><td>1</td><td>0</td></tr>
+							<tr><td>Diggers</td><td>1</td><td>0</td></tr>
+							<tr><td>Ballers</td><td>0</td><td>1</td></tr>
+							<tr><td>Smash Bros</td><td>0</td><td>1</td></tr>
+						</tbody>
+					</table>
+				</section>
+			</div>
+	
+			<div className="play-button-container">
+				<button className='pixelated small centered' onClick={playGame}>Play</button>
+			</div>
+	
 			{renderGameStats()}
-		</section>
+		</div>
 	);
+	
 };
 
 export default GamePanel;

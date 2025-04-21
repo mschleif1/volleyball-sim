@@ -3,6 +3,7 @@ import { useAppData } from '../AppDataContext';
 import PixelTable from './PixelTable';
 import '../styling/HomePage.css';
 import GamePanel  from "./GamePanel"
+import { GameStats } from '@engine/GameStats';
 const HomePage = () => {
 	const appData = useAppData();
 
@@ -10,7 +11,7 @@ const HomePage = () => {
 		return <div className="pixelated full-page">Loading...</div>;
 	}
 
-	const { league, seasons, teams, players } = appData;
+	const { league, seasons, teams, players, gameStats } = appData;
 	
 	
 	const currentSeason = Object.values(seasons).at(-1);
@@ -73,7 +74,7 @@ const HomePage = () => {
 			</header>
 
             <section className='team-section'> 
-                <h2> {userTeam && userTeam.name}</h2>
+                <h2> {userTeam && userTeam.name} {userTeam && GameStats.getRecord(userTeam.id, gameStats)}</h2>
             </section>
             
 			{renderPlayGamePanel()}
