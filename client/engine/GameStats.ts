@@ -11,9 +11,11 @@ export type Ball = {
 
 export class GameStats {
 	public playerStats: Record<string, PlayerStats> = {};
-	public setScores: { [key: number]: number }[] = [];
+	public setScores: { [key: string]: number }[] = [];
 	public winningTeamId: string | null = null;
+	public losingTeamId: string | null = null;
 	public id: string;
+
 
 	constructor(id: string) {
 		this.id = id;
@@ -30,6 +32,7 @@ export class GameStats {
         );
         stats.setScores = data.setScores || [];
         stats.winningTeamId = data.winningTeamId || null;
+		stats.losingTeamId = data.losingTeamId || null;
         return stats;
     }
 
@@ -72,6 +75,7 @@ export class GameStats {
 			playerStats: serializedPlayerStats,
 			setScores: this.setScores,
 			winningTeamId: this.winningTeamId,
+			losingTeamId: this.losingTeamId,
 			id: this.id,
 		};
 	}
@@ -85,8 +89,6 @@ export class GameStats {
 		Object.keys(gameStats).forEach(id=>{
 			const teamIds = id.split("-")
 			if (teamIds[0] == teamId || teamIds[1] == teamId){
-				console.log("RELEVANT GAME HERE!!!")
-				console.log(gameStats[id])
 				if (gameStats[id].winningTeamId == teamId){
 					wins ++
 				} else {
@@ -101,4 +103,41 @@ export class GameStats {
 
 		return `${wins}-${losses}`
 	}
+
+	static getResultForTeam(gameStats: Record<string, GameStats>, weekIndex: number, teamId: string): GameStats | void {
+		const gameIds = Object.keys(gameStats)
+		for (let i = 0; i < gameIds.length; i++){
+			const gameId = gameIds[i]
+			const ids = gameId.split("-")
+	
+			
+			if (parseInt(ids[2]) == weekIndex && (teamId == ids[0] || teamId == ids[1])){
+				return gameStats[gameId]
+			}
+		}
+	}
+
+	static getRecordsForTeams(gameStats: Record<string, GameStats>): Record<string, { wins: number; losses: number }> {
+		let records: Record<string, { wins: number; losses: number }> = {}
+		const gameIds = Object.keys(gameStats)
+	
+		for (let i = 0; i < gameIds.length; i++) {
+			const gameStat = gameStats[gameIds[i]]
+			const winningTeamId = gameStat.winningTeamId!
+			const losingTeamId = gameStat.losingTeamId!
+	
+			if (!records[winningTeamId]) {
+				records[winningTeamId] = { wins: 0, losses: 0 }
+			}
+			if (!records[losingTeamId]) {
+				records[losingTeamId] = { wins: 0, losses: 0 }
+			}
+	
+			records[winningTeamId].wins += 1
+			records[losingTeamId].losses += 1
+		}
+	
+		return records
+	}
+	
 }

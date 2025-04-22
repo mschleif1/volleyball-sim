@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAppData } from '../AppDataContext'; // adjust path as needed
 import { Game } from "@engine/Game"
+import { Team } from "@engine/Team"
 import { handleGameWeekSim } from "@engine/DataManager"
 import { saveGame } from '@engine/DataManager';
 import '../styling/GamePanel.css';
 import PixelTable from './PixelTable';
+import { GameStats } from '@engine/GameStats';
 
 const statColumns = [
 	'Name',
@@ -27,6 +29,8 @@ const statColumns = [
 
 const GamePanel: React.FC = () => {
 	const appData = useAppData();
+	const [gameStatsList, setGameStatsList] = useState<any[]>([]);
+	const [showPlayerStats, setShowPlayerStats] = useState<{ [key: number]: boolean }>({});
 
 	if (!appData || !appData.league) {
 		return <div className="pixelated full-page">Loading...</div>;
@@ -35,9 +39,8 @@ const GamePanel: React.FC = () => {
 	const { league, seasons, teams, players, gameStats, playerStats } = appData;
 	const currentSeason = Object.values(seasons).at(-1);
 	const currentWeek = currentSeason!.currentWeek;
-
-	const [gameStatsList, setGameStatsList] = useState<any[]>([]);
-	const [showPlayerStats, setShowPlayerStats] = useState<{ [key: number]: boolean }>({});
+	const userTeam = Team.getUserTeam(teams)
+	
 
 	const playGame = () => {
 		const newGameStats = currentSeason!.simWeek(appData);
@@ -140,6 +143,90 @@ const GamePanel: React.FC = () => {
 	};
 
 	// --- Render ---
+	function getLastWeekResultText(){
+		const lastWeekResult = GameStats.getResultForTeam(gameStats, currentWeek - 1, userTeam.id)
+		
+		console.log("LAST WEEK RESULT")
+		console.log(lastWeekResult)
+		let lastWeekResultText = <span> No games played yet.</span>
+		
+		if (lastWeekResult){
+			
+			const id1 = lastWeekResult.losingTeamId!
+			const id2 = lastWeekResult.winningTeamId!
+			
+			let team1Sets = 0
+			let team2Sets = 0
+	
+			lastWeekResult.setScores.forEach(set=>{
+				if (set[id1] > set[id2] ){
+					team1Sets += 1
+				} else {
+					team2Sets += 1
+				}
+			})
+			let gameStatus = "L"
+			if (userTeam.id == lastWeekResult.winningTeamId){ gameStatus = "W" } 
+			lastWeekResultText = <span> {teams[id1].name} ({team1Sets}) - {teams[id2].name} ({team2Sets}) | {gameStatus}  </span>
+		}
+		return lastWeekResultText
+	}
+
+	const renderStandingsTable = () => {
+		const records = GameStats.getRecordsForTeams(gameStats); // { [teamId]: { wins: number, losses: number } }
+	
+		// Map records to include team name, default to 0-0 if no record found
+		const teamRows = Object.values(teams).map(team => {
+			const record = records[team.id] || { wins: 0, losses: 0 };
+			return {
+				name: team.name,
+				wins: record.wins,
+				losses: record.losses,
+			};
+		});
+	
+		// Sort by wins descending, then by losses ascending (as a tiebreaker)
+		teamRows.sort((a, b) => {
+			if (b.wins === a.wins) {
+				return a.losses - b.losses;
+			}
+			return b.wins - a.wins;
+		});
+	
+		// PixelTable expects columns and 2D array of string data
+		const columns = ['Team', 'Wins', 'Losses'];
+		const data = teamRows.map(team => [
+			team.name,
+			String(team.wins),
+			String(team.losses),
+		]);
+	
+		return <PixelTable columns={columns} data={data} />;
+	};
+
+	function getThisWeeksOpponent(){
+		if (!currentSeason){ return <span> No matchup this week </span>}
+		const currentWeekGames = currentSeason.schedule[currentWeek]
+		let teamName = ""
+		for (let i = 0; i < currentWeekGames.length; i++){
+			const matchup = currentWeekGames[i]
+			if (matchup[0] == userTeam.id){
+				teamName = teams[matchup[1]].name
+				break;
+			} else if (matchup[1] == userTeam.id){
+				teamName = teams[matchup[0]].name
+				break;
+			}
+		}
+
+		return (
+			<div> 
+				{ teamName }
+				<button className='pixelated small centered margin-left' onClick={playGame}>Play</button>
+			</div>
+		)
+	}
+	
 	return (
 		<div className="game-panel-wrapper pixelated">
 			<header className="game-header">
@@ -148,35 +235,17 @@ const GamePanel: React.FC = () => {
 	
 			<div className="info-panels">
 				<section className="past-results summary">
+					<h3> Week {currentWeek + 1} Opponent: </h3>
+					{getThisWeeksOpponent()}
 					<h3>Past Results</h3>
-					<ul>
-						<li>Week 1: Jackopepes 2 - 1 Ballers</li>
-						<li>Week 1: Smash Bros 0 - 2 Diggers</li>
-					</ul>
+					{getLastWeekResultText()}
+					
 				</section>
 	
 				<section className="standings summary">
 					<h3>Standings</h3>
-					<table className="pixelated-table">
-						<thead>
-							<tr>
-								<th>Team</th>
-								<th>W</th>
-								<th>L</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr><td>Jackopepes</td><td>1</td><td>0</td></tr>
-							<tr><td>Diggers</td><td>1</td><td>0</td></tr>
-							<tr><td>Ballers</td><td>0</td><td>1</td></tr>
-							<tr><td>Smash Bros</td><td>0</td><td>1</td></tr>
-						</tbody>
-					</table>
+					{renderStandingsTable()}
 				</section>
-			</div>
-	
-			<div className="play-button-container">
-				<button className='pixelated small centered' onClick={playGame}>Play</button>
 			</div>
 	
 			{renderGameStats()}

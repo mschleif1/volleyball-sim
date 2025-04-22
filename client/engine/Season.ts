@@ -20,7 +20,7 @@ attributes:
 - playoffSchedule - []
 */
 
-type Matchup = [number, number];
+type Matchup = [string, string];
 
 import {Game} from "./Game"
 import {Team} from "./Team"
@@ -66,7 +66,7 @@ export class Season {
 			for (let i = 0; i < matchupsPerWeek; i++) {
 				const home = rotation[i];
 				const away = rotation[numTeams - 1 - i];
-				weekMatchups.push([home, away]);
+				weekMatchups.push([home.toString(), away.toString()]);
 			}
 
 			schedule.push(weekMatchups);

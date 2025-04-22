@@ -25,7 +25,6 @@
     max-width: 800px;
     text-align: left;
     margin: 1rem auto;
-    background-color: rgba(240, 240, 240, 0.95);
     padding: 1rem;
     border-radius: 8px;
 	/* box-shadow: 2px 2px 0 #aaa; */
@@ -61,4 +60,8 @@ h3 {
 .team-section {
     margin-top: 1rem;
     color: #111;
+}
+
+.margin-left{
+    margin-left: 1rem;
 }

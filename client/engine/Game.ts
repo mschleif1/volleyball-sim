@@ -26,7 +26,7 @@ export class Game {
         this.id = id
 	}
 
-    getTeam(teamId: number): Team {
+    getTeam(teamId: string): Team {
         if (this.team1.id == teamId){
             return this.team1
         } else {
@@ -35,7 +35,7 @@ export class Game {
         return this.team1
     }
 
-    playPoint(winningTeamId: number, verbose?: boolean | null): number{
+    playPoint(winningTeamId: string, verbose?: boolean | null): string{
         // Starting with the serving team
         // serve the ball
         // start the point as normal
@@ -92,18 +92,8 @@ export class Game {
         return teamWithoutBall.id
     }
 
-    recordStats(pointHistory: Object[]){
-        // create some kind of record of the points
-
-        // Player stats ==>
-        /*
-        create new stats for the player, and for the season
-        */
-    }
-
-
     // Simulate a single set and return the winning team
-	playSet(): number {
+	playSet(): string {
         
         let currentSetScores = {
             [this.team1.id]: 0,
@@ -170,16 +160,18 @@ export class Game {
         
         if (t1SetsWon > t2SetsWon){
             this.gameStats.winningTeamId = this.team1.id
+            this.gameStats.losingTeamId = this.team2.id
             
         } else {
             this.gameStats.winningTeamId = this.team2.id
+            this.gameStats.losingTeamId = this.team1.id
         }
 
         return this.gameStats
 
 	}
 
-    static createGameId(team1: number, team2: number, weekNumber: number): string {
+    static createGameId(team1: string, team2: string, weekNumber: number): string {
         return `${team1}-${team2}-${weekNumber}`
     }
 

@@ -21,7 +21,6 @@ export class PlayerStats {
 	averageSpikeSpeed = 0;
 
 	constructor(playerId: number, data?: Partial<PlayerStats>) {
-		console.log(data)
 		this.playerId = playerId;
 		if (data) Object.assign(this, data);
 	}

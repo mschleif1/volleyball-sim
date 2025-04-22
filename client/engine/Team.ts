@@ -156,4 +156,8 @@ export class Team {
 			teamAttributes.name, teamAttributes.playerIds, teamAttributes.id, teamAttributes.userTeam
 		)
     }
+
+    static getUserTeam(teams: Record<string, Team>): Team{
+        return Object.values(teams).find(team=> team.userTeam)!
+    }
 }
