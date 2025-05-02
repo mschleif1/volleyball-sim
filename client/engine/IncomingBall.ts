@@ -4,7 +4,7 @@ export type Ball = {
 	speed: number;
 	inPlay: boolean;
 	type: string; // 'serve', 'pass', 'set', 'spike', etc.
-	playerId: number;
+	playerId: string;
 };
 
 export class IncomingBall {
@@ -12,10 +12,10 @@ export class IncomingBall {
 	inPlay: boolean;
     type: string;
     history: Ball[];
-    playerId: number;
+    playerId: string;
 
 
-	constructor(speed: number, inPlay: boolean, type: string, playerId: number) {
+	constructor(speed: number, inPlay: boolean, type: string, playerId: string) {
 		this.speed = speed
         this.inPlay = true
         this.type = "serve"

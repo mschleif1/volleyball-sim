@@ -6,7 +6,7 @@ export type Ball = {
 	speed: number;
 	inPlay: boolean;
 	type: string; // 'serve', 'pass', 'set', 'spike', etc.
-	playerId: number;
+	playerId: string;
 };
 
 export class GameStats {
@@ -36,7 +36,7 @@ export class GameStats {
         return stats;
     }
 
-    private initializePlayer(playerId: number): void {
+    private initializePlayer(playerId: string): void {
         if (!this.playerStats[playerId]) {
             this.playerStats[playerId] = new PlayerStats(playerId);
         }

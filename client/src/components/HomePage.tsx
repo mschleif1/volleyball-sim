@@ -54,7 +54,7 @@ const HomePage = () => {
 		? userTeam.playerIds.map(id => players[id])
 		: [];
 
-	const columns = ['Name', 'Position','Power', 'Consistency', 'Set', 'Pass', 'Block'];
+	const columns = ['Name', 'Position','Power', 'Consistency', 'Set', 'Pass', 'Block', "Jumping", "Stamina", "Energy"];
 	const data = (teamPlayers as any[]).map(p => [
 		p.name,
 		p.position.toString(),
@@ -62,7 +62,10 @@ const HomePage = () => {
 		p.consistency.toString(),
 		p.setting.toString(),
 		p.passing.toString(),
-		p.blocking.toString()
+		p.blocking.toString(),
+		p.jumping.toString(),
+		p.stamina.toString(),
+		p.currentEnergy.toString()
 	]);
 
 

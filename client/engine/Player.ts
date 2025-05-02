@@ -1,23 +1,31 @@
 import { IncomingBall } from "./IncomingBall";
 
 const MAX_SPEED = 80
+const MIDDLE = "middle"
+const HITTER = "hitter"
+const SETTER = "setter"
+const LIBERO = "libero"
+
+
 export class Player {
 	name: string;
 	position: string;
-	id: number;
+	id: string;
   
 	jumping: number;
 	power: number;
 	consistency: number;
 	setting: number;
 	blocking: number;
-	bumping: number;
 	passing: number;
+	stamina: number;
+	currentEnergy: number;
 	teamId: string | null;
   
 	constructor(
-	  name: string, position: string, id: number, jumping: number, passing: number,
-	  power: number, consistency: number,setting: number, blocking: number, bumping: number, teamId: string | null
+		name: string, position: string, id: string, jumping: number, passing: number,
+		power: number, consistency: number,setting: number, blocking: number, stamina: number, 
+		currentEnergy: number | null, teamId: string | null
 	) {
 		this.name = name;
 		this.id = id;
@@ -28,9 +36,15 @@ export class Player {
 		this.consistency = consistency;
 		this.setting = setting;
 		this.blocking = blocking;
-		this.bumping = bumping;
 		this.passing = passing
+		this.stamina = stamina
 		this.teamId = teamId
+		
+		if (!currentEnergy){
+			this.currentEnergy = 100
+		} else {
+			this.currentEnergy = currentEnergy
+		}
 	}
   
 	get overall(): number {
@@ -40,24 +54,8 @@ export class Player {
 		this.consistency +
 		this.setting +
 		this.blocking +
-		this.bumping
+		this.stamina
 	  ) / 6;
-	}
-  
-	static fromJSON(data: any): Player {
-		return new Player(
-		data.name,
-		data.position,
-		data.id,
-		data.jumping,
-		data.power,
-		data.consistency,
-		data.setting,
-		data.blocking,
-		data.bumping,
-		data.passing,
-		data.teamId
-	  );
 	}
 
 	simulateServe(): IncomingBall {
@@ -185,12 +183,42 @@ export class Player {
 		incomingBall.playerId = this.id
 		incomingBall.updateHistory()
 	}
+
+	// called after a point is played
+	fatigue(): void{
+		const stamina = this.stamina;
+		
+		// Fatigue rate scales inversely with stamina
+		// 0.4 fatigue per point at 0 stamina (fast drain)
+		// 0.16 fatigue per point at 100 stamina (slow drain)
+		const baseFatigueRate = 0.7;      // worst-case per point
+		const minFatigueRate = 0.3;      // best-case per point
+		
+		// Linear interpolation between base and min based on stamina
+		const fatiguePerPoint = baseFatigueRate - ((baseFatigueRate - minFatigueRate) * (stamina / 100));
+		
+		console.log(Math.max(0, this.currentEnergy - fatiguePerPoint))
+		this.currentEnergy = Math.max(0, this.currentEnergy - fatiguePerPoint);
+	}
+	 
+	rest(): void {
+		const staminaFactor = this.stamina / 100;
+
+		// Smaller recovery range: 4 to 15 energy
+		const minRecovery = 1;
+		const maxRecovery = 7;
+
+		const recovery = minRecovery + (maxRecovery - minRecovery) * staminaFactor;
+
+		this.currentEnergy = Math.min(100, this.currentEnergy + recovery);
+	}
+
 	static rehydrate(jsonData: string): Player{
 		const playerAttributes = JSON.parse(jsonData)
 		return new Player(
 			playerAttributes.name, playerAttributes.position, playerAttributes.id, playerAttributes.jumping, playerAttributes.passing,
-	  		playerAttributes.power, playerAttributes.consistency, playerAttributes.setting, playerAttributes.blocking, playerAttributes.bumping, 
-			playerAttributes.teamId
+	  		playerAttributes.power, playerAttributes.consistency, playerAttributes.setting, playerAttributes.blocking, playerAttributes.stamina, 
+			playerAttributes.currentEnergy, playerAttributes.teamId
 		)
 	}
 }

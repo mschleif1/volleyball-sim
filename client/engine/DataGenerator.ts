@@ -3,138 +3,14 @@ import { Team } from "./Team"
 import { League } from "./League"
 import { Season } from "./Season"
 import { saveGame } from './DataManager';
+import { firstNames, lastNames, teamNames, statRangeByPosition} from "./DataConfig"
 
 import _ from "lodash"
 
-const teamNames = [
-	"Spike Syndicate",
-	"Net Ninjas",
-	"Block Party",
-	"Ace Assassins",
-	"Kill Shot",
-	"Smash Titans",
-	"The Dig Force",
-	"Vertical Threat",
-	"Powerline",
-	"Cross Court Kings",
-	"Set to Stun",
-	"Net Results",
-	"Bumpin' Uglies",
-	"Hit Me Baby One More Time",
-	"Notorious D.I.G.",
-	"New Kids on the Block",
-	"I'd Hit That",
-	"Served Cold",
-	"Spikological Warfare",
-	"Dig-a-saurus Rex",
-	"Sunset Spikers",
-	"Coastal Chaos",
-	"Northern Netters",
-	"Midtown Smash",
-	"Downtown Diggers",
-	"Pacific Power",
-	"Urban Elevation",
-	"Highland Heat",
-	"Lakeside Killers",
-	"Metro Volley Club"
-]
-
-const firstNames = [
-    "Matt",
-    "Ozzmatazz",
-    "Contessa",
-    "Brynn",
-    "Reilly",
-    "Terrence",
-    "Cornstock",
-    "Billy Joe",
-    "Marissa",
-    "Kayleigh",
-    "Botswana",
-    "Karminissa",
-    "Jazz",
-    "Beatrice",
-    "Grace",
-    "Sara",
-    "Clarrisa",
-    "Rodney",
-	"Cara",
-	"Darth",
-	"Garth",
-	"Saxon",
-	"John",
-	"Jacob",
-	"Crysanthemum",
-	"Coraline",
-	"Beau",
-	"Terrence",
-	"Nick",
-	"Asher",
-	"Tomás",
-	"Quentin",
-	"Philip",
-	"Draco",
-	"Dumbledore",
-	"Hubert",
-	"Juan",
-	"Josefina",
-	"David",
-	"Corinne",
-	"Marcos",
-	"Maria", 
-	"Marty",
-	"Alicia",
-	"Julia",
-	"Olivia",
-	"Teresa",
-	"Daniel",
-	"Quentin",
-	"Seamus"
-];
-
-const lastNames = [
-	"O'Malley",
-    "Johnson",
-    "Cellars",
-    "Matthews",
-	"Gingleheimer-Smith",
-	"Dinklestein",
-    "Williams",
-    "McTabernathy",
-    "Doorfenshmith",
-    "Goldstein",
-    "Hoovensmitch",
-    "Briddleby",
-    "Borker",
-    "Haverford",
-    "Flagg",
-    "Jordan",
-    "Lively",
-    "Reynolds",
-	"Mungo",
-	"Congolius",
-	"Giggums",
-	"Pinklewerry",
-	"Persifermus",
-	"John",
-	"Lichtenstein",
-	"Townley",
-	"Tuttle",
-	"Raytheon",
-	"Erasmus",
-	"Hollander",
-	"Adams",
-	"Maloise",
-	"Concão",
-	"Felicitão",
-	"Jones",
-	"Ng",
-	"Chen",
-	"Huang"
-]
-const PLAYERS_PER_TEAM = 6
+const PLAYERS_PER_TEAM = 11
 const PLAYER_LEAGUE_COUNT = 70
 const TEAM_LEAGUE_COUNT = 10
+
 const generateRating = () =>{
     return Math.floor(Math.random() * (100 - 50 + 1)) + 50;
 
@@ -145,12 +21,27 @@ const generateId = (min= 0, max= 100) =>{
 
 }
 
-const generatePlayer = (playerIndex: number)=>{
-    
-    const firstName = _.sample(firstNames)
-    const lastName = _.sample(lastNames)
-    return new Player(`${firstName} ${lastName}`, "OH", playerIndex, generateRating(), generateRating(), generateRating(), generateRating(), generateRating(), generateRating(), generateRating(), null)
-}
+const generatePlayer = (playerIndex: number, position: string): Player => {
+	const firstName = _.sample(firstNames)!;
+	const lastName = _.sample(lastNames)!;
+	const stats = statRangeByPosition[position];
+
+	const rand = (range: [number, number]) => 
+		Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+
+	return new Player(
+		`${firstName} ${lastName}`, position, playerIndex.toString(),
+		rand(stats.jumping),
+		rand(stats.passing),
+		rand(stats.power),
+		rand(stats.consistency),
+		rand(stats.setting),
+		rand(stats.blocking),
+		rand(stats.stamina),
+		null,
+		null
+	);
+};
 
 export const generateTeam = (teamName: string, teamIndex: number): Team => {
 	
@@ -177,26 +68,37 @@ export const generateLeagueTeams = (userTeamName: string): Team[] => {
 
 type LeagueBundle = {
 	league: League;
-	teams: Record<number, Team>;
-	players: Record<number, Player>;
-	seasons: Record<number, Season>;
+	teams: Record<string, Team>;
+	players: Record<string, Player>;
+	seasons: Record<string, Season>;
 };
 
 export const generateLeague = (playerTeamName: string): LeagueBundle => {	
 	let playerIdCounter = 0;
 	let teamIdCounter = 0;
 
-	let players: Record<number, Player> = {}
-	while (playerIdCounter < PLAYER_LEAGUE_COUNT){
-		players[playerIdCounter] = generatePlayer(playerIdCounter ++)
-		
-	}
+	let players: Record<string, Player> = {}
 	
-	let teams: Record<number, Team> = {}
-	while (teamIdCounter < TEAM_LEAGUE_COUNT - 1){
-		teams[teamIdCounter] = generateTeam("", teamIdCounter ++)
+	for (let teamIdx = 0; teamIdx < TEAM_LEAGUE_COUNT; teamIdx++) {
+		const roles = [
+			...Array(2).fill("setter"),
+			...Array(5).fill("hitter"),
+			...Array(3).fill("middle"),
+			"libero"
+		];
+
+		for (const role of roles) {
+			players[playerIdCounter.toString()] = generatePlayer(playerIdCounter, role);
+			playerIdCounter++;
+		}
 	}
-	teams[teamIdCounter] = generateTeam(playerTeamName, teamIdCounter)
+
+	
+	let teams: Record<string, Team> = {}
+	while (teamIdCounter < TEAM_LEAGUE_COUNT - 1){
+		teams[teamIdCounter.toString()] = generateTeam("", teamIdCounter ++)
+	}
+	teams[teamIdCounter.toString()] = generateTeam(playerTeamName, teamIdCounter)
 	
 	// Connect the teams and players
 	let teamsFilled = 0
@@ -215,7 +117,7 @@ export const generateLeague = (playerTeamName: string): LeagueBundle => {
 	let league = new League(2025)
 
 	let season = new Season(Object.keys(teams).map((k)=>Number(k)), 2025)
-	const seasons = {2025: season}
+	const seasons = {'2025': season}
 
 
 	return {

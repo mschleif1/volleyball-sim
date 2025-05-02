@@ -1,5 +1,5 @@
 export class PlayerStats {
-	playerId: number;
+	playerId: string;
 
 	servesAttempted = 0;
 	servesMissed = 0;
@@ -20,7 +20,7 @@ export class PlayerStats {
 	kills = 0;
 	averageSpikeSpeed = 0;
 
-	constructor(playerId: number, data?: Partial<PlayerStats>) {
+	constructor(playerId: string, data?: Partial<PlayerStats>) {
 		this.playerId = playerId;
 		if (data) Object.assign(this, data);
 	}

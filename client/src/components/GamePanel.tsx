@@ -69,7 +69,7 @@ const GamePanel: React.FC = () => {
 		return <PixelTable columns={columns} data={data} />;
 	};
 
-	const formatPlayerStats = (playerIds: number[], game: any) => {
+	const formatPlayerStats = (playerIds: string[], game: any) => {
 		return playerIds.map(playerId => {
             const player = players[playerId]
 			const stat = game.playerStats[playerId];
@@ -94,7 +94,7 @@ const GamePanel: React.FC = () => {
 		});
 	};
 
-	const renderPlayerStatsTable = (teamName: string, playerIds: number[], game: any) => {
+	const renderPlayerStatsTable = (teamName: string, playerIds: string[], game: any) => {
 		const data = formatPlayerStats(playerIds, game);
 		return (
 			<>
@@ -146,8 +146,6 @@ const GamePanel: React.FC = () => {
 	function getLastWeekResultText(){
 		const lastWeekResult = GameStats.getResultForTeam(gameStats, currentWeek - 1, userTeam.id)
 		
-		console.log("LAST WEEK RESULT")
-		console.log(lastWeekResult)
 		let lastWeekResultText = <span> No games played yet.</span>
 		
 		if (lastWeekResult){
