@@ -6,7 +6,6 @@ const HITTER = "hitter"
 const SETTER = "setter"
 const LIBERO = "libero"
 
-
 export class Player {
 	name: string;
 	position: string;
@@ -24,7 +23,7 @@ export class Player {
   
 	constructor(
 		name: string, position: string, id: string, jumping: number, passing: number,
-		power: number, consistency: number,setting: number, blocking: number, stamina: number, 
+		power: number, consistency: number, setting: number, blocking: number, stamina: number, 
 		currentEnergy: number | null, teamId: string | null
 	) {
 		this.name = name;
@@ -58,27 +57,46 @@ export class Player {
 	  ) / 6;
 	}
 
+	// At 100 energy, player plays at full strength.
+	// At 0 energy, ratings are reduced by 20%.
+	getEnergyMultiplier(): number {
+		const fatiguePenalty = 0.2; // 20% drop at 0 energy
+		const multiplier = 1 - ((1 - this.currentEnergy / 100) * fatiguePenalty);
+		return this.round2(multiplier);
+	}
+
+	// Returns energy-scaled value of a numeric stat
+	getEffective(attr: keyof Player): number {
+		const raw = this[attr];
+		if (typeof raw === "number") {
+			return this.round2(raw * this.getEnergyMultiplier());
+		}
+		return 0;
+	}
+
 	simulateServe(): IncomingBall {
-		const faultChance = Math.max(0.1, 1 - (this.consistency / 100)); // more power = riskier
+		const consistency = this.getEffective("consistency");
+		const power = this.getEffective("power");
+
+		const faultChance = Math.max(0.1, 1 - (consistency / 100)); // more power = riskier
 		const rand = Math.random();
 		
-		
 		if (rand < faultChance) {
-			return new IncomingBall(0, false,"serve", this.id)
+			return new IncomingBall(0, false, "serve", this.id)
 		}
 	
 		// Serve is successful, calculate speed
-		const maxSpeed = MAX_SPEED;
-		const speed = Math.round((this.power / 100) * maxSpeed + Math.random() * 5); // small randomness
+		const speed = Math.round((power / 100) * MAX_SPEED + Math.random() * 5); // small randomness
 		let incomingBall = new IncomingBall(speed, true, "serve", this.id)
 
 		incomingBall.updateHistory()
 		return incomingBall
 	}
 
-	passBall(incomingBall: IncomingBall): void{
+	passBall(incomingBall: IncomingBall): void {
 		const normalizedSpeed = incomingBall.speed / MAX_SPEED;
-		const normalizedPassing = this.passing / 100;
+		const normalizedPassing = this.getEffective("passing") / 100;
+		
 		// Base pass quality is affected by how well passing handles the speed
 		const effectiveness = normalizedPassing - normalizedSpeed;
 		
@@ -102,9 +120,9 @@ export class Player {
 		incomingBall.updateHistory()
 	}
 
-	setBall(incomingBall: IncomingBall): void{
+	setBall(incomingBall: IncomingBall): void {
 		const passQuality = incomingBall.speed // value that should be 1,2,3. 3 is best, 1 is worse
-		const setSkill = this.setting
+		const setSkill = this.getEffective("setting")
 		
 		// Determine a base multiplier for how much skill can compensate for bad passes
 		const passMultiplier = {
@@ -134,8 +152,8 @@ export class Player {
 	}
 
 	spikeBall(incomingBall: IncomingBall): void {
-		const consistency = this.consistency;
-		const power = this.power;            
+		const consistency = this.getEffective("consistency");
+		const power = this.getEffective("power");            
 		incomingBall.type = "spike"
 		
 		if (incomingBall.speed === 1) {
@@ -184,21 +202,25 @@ export class Player {
 		incomingBall.updateHistory()
 	}
 
+	round2(value: number): number {
+		return Math.round(value * 100) / 100;
+	}
+
 	// called after a point is played
-	fatigue(): void{
+	fatigue(): void {
 		const stamina = this.stamina;
 		
 		// Fatigue rate scales inversely with stamina
 		// 0.4 fatigue per point at 0 stamina (fast drain)
 		// 0.16 fatigue per point at 100 stamina (slow drain)
 		const baseFatigueRate = 0.7;      // worst-case per point
-		const minFatigueRate = 0.3;      // best-case per point
-		
+		const minFatigueRate = 0.3;       // best-case per point
+	
 		// Linear interpolation between base and min based on stamina
 		const fatiguePerPoint = baseFatigueRate - ((baseFatigueRate - minFatigueRate) * (stamina / 100));
-		
-		console.log(Math.max(0, this.currentEnergy - fatiguePerPoint))
-		this.currentEnergy = Math.max(0, this.currentEnergy - fatiguePerPoint);
+		const roundedFatigue = this.round2(fatiguePerPoint);
+	
+		this.currentEnergy = Math.max(0, this.round2(this.currentEnergy - roundedFatigue));
 	}
 	 
 	rest(): void {
@@ -209,11 +231,25 @@ export class Player {
 		const maxRecovery = 7;
 
 		const recovery = minRecovery + (maxRecovery - minRecovery) * staminaFactor;
+		const roundedRecovery = this.round2(recovery);
 
-		this.currentEnergy = Math.min(100, this.currentEnergy + recovery);
+		this.currentEnergy = Math.min(100, this.round2(this.currentEnergy + roundedRecovery));
 	}
 
-	static rehydrate(jsonData: string): Player{
+	restWeek(): void {
+		const staminaFactor = this.stamina / 100;
+
+		// Larger recovery range: 10 to 20 energy
+		const minRecovery = 10;
+		const maxRecovery = 20;
+
+		const recovery = minRecovery + (maxRecovery - minRecovery) * staminaFactor;
+		const roundedRecovery = this.round2(recovery);
+
+		this.currentEnergy = Math.min(100, this.round2(this.currentEnergy + roundedRecovery));
+	}
+
+	static rehydrate(jsonData: string): Player {
 		const playerAttributes = JSON.parse(jsonData)
 		return new Player(
 			playerAttributes.name, playerAttributes.position, playerAttributes.id, playerAttributes.jumping, playerAttributes.passing,

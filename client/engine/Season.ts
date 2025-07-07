@@ -96,6 +96,10 @@ export class Season {
             
 			let game = new Game(home, away, Game.createGameId(homeId, awayId, this.currentWeek))
             gameResults.push(game.playGame())
+			
+			// Teams rest after their game.
+			home.applyWeekRest()
+			away.applyWeekRest()
 		});
 
 		return gameResults

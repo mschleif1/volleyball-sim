@@ -3,6 +3,7 @@ import { useAppData } from '../AppDataContext';
 import PixelTable from './PixelTable';
 import '../styling/HomePage.css';
 import GamePanel  from "./GamePanel"
+import LineupPage from "./LineupPage"
 import { GameStats } from '@engine/GameStats';
 const HomePage = () => {
 	const appData = useAppData();
@@ -65,7 +66,7 @@ const HomePage = () => {
 		p.blocking.toString(),
 		p.jumping.toString(),
 		p.stamina.toString(),
-		p.currentEnergy.toString()
+		Math.round(p.currentEnergy).toString()
 	]);
 
 
@@ -89,6 +90,10 @@ const HomePage = () => {
 				) : (
 					<p>No players found for your team.</p>
 				)}
+			</section>
+			<section className="players-section">
+				<h2>Select Lineup</h2>
+				<LineupPage/>
 			</section>
 		</div>
 	);

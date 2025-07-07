@@ -1,0 +1,38 @@
+.LineupPage{
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+.enabled-button{
+    color: #ffa500;
+    background-color: transparent;
+}
+
+.disabled-button{
+    background-color: transparent;
+}
+
+.player-control {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.control-panel {
+	display: flex;
+	gap: 4px;
+	margin-right: 12px;
+}
+
+.control-panel button {
+	width: 24px;
+	height: 24px;
+	font-size: 16px;
+	padding: 0;
+	line-height: 1;
+}
+
+.player-name {
+	display: flex;
+	gap: 8px;
+}

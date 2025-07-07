@@ -10,6 +10,7 @@ export class Team {
     lineup: { [key: number]: Player };  
     userTeam: boolean;
     players: Player[];
+    lineupPreferences: { [position: string]: string[] };
 
 	constructor(name: string, playerIds: string[], id: string, userTeam: boolean) {
 		this.name = name;
@@ -18,6 +19,7 @@ export class Team {
         this.userTeam = userTeam
         this.players = []
         this.lineup =  {}
+        this.lineupPreferences = {}
 	}
 
 	get averageSkill(): number {
@@ -25,6 +27,12 @@ export class Team {
 		return total / this.players.length;
 	}
 
+    // Helper to get player preference index (lower is more preferred)
+    getPreferenceRank(player: Player): number {
+        if (!this.userTeam || !this.lineupPreferences[player.position]) return Infinity;
+        const index = this.lineupPreferences[player.position].indexOf(player.id);
+        return index >= 0 ? index : Infinity;
+    }
 
     rotateTeam(rotationsLeft: number): boolean {
         const rotationOrder = [1, 6, 5, 4, 3, 2];
@@ -88,8 +96,12 @@ export class Team {
                 const possibleSubs = bench
                     .filter(p => p.position === current.position)
                     .sort((a, b) => {
-                        const aScore = (100 - a.currentEnergy) * (110 - a.overall);
-                        const bScore = (100 - b.currentEnergy) * (110 - b.overall);
+                        const aFatigue = (100 - a.currentEnergy) * (110 - a.overall);
+                        const bFatigue = (100 - b.currentEnergy) * (110 - b.overall);
+                        const aPref = this.getPreferenceRank(a);
+                        const bPref = this.getPreferenceRank(b);
+                        const aScore = aFatigue * 0.7 + aPref * 10;
+                        const bScore = bFatigue * 0.7 + bPref * 10;
                         return aScore - bScore;
                     });
     
@@ -103,7 +115,6 @@ export class Team {
     
         return false; // No regular sub was made
     }
-    
 
     currentServer(): Player{
         return this.lineup![1]
@@ -121,30 +132,33 @@ export class Team {
                 this.players.push(player);
             }
         });
-    
+
         const sortByOverall = (a: Player, b: Player) => b.overall - a.overall;
-        console.log(this.players)
-        console.log(this.players.filter(p => p.position == "middle"), "MIDDLES")
-        const middles = this.players.filter(p => p.position === "middle").sort(sortByOverall);
-        const hitters = this.players.filter(p => p.position === "hitter").sort(sortByOverall);
-        const setters = this.players.filter(p => p.position === "setter").sort(sortByOverall);
         const selected = new Set<string>();
         const lineup: { [key: number]: Player } = {};
+
+        const pickFrom = (players: Player[], position: string, count: number): Player[] => {
+            const filtered = players.filter(p => p.position === position);
+            if (this.userTeam && this.lineupPreferences[position]) {
+                return [...filtered].sort((a, b) => this.getPreferenceRank(a) - this.getPreferenceRank(b)).slice(0, count);
+            } else {
+                return [...filtered].sort(sortByOverall).slice(0, count);
+            }
+        }
     
         // Assign middles opposite each other — default to positions 2 and 5
-        const middle1 = middles[0];
-        const middle2 = middles[1];
-        if (middle1) {
-            lineup[2] = middle1;
-            selected.add(middle1.id);
+        const middles = pickFrom(this.players, "middle", 2);
+        if (middles[0]) {
+            lineup[2] = middles[0];
+            selected.add(middles[0].id);
         }
-        if (middle2) {
-            lineup[5] = middle2;
-            selected.add(middle2.id);
+        if (middles[1]) {
+            lineup[5] = middles[1];
+            selected.add(middles[1].id);
         }
     
         // Assign best setter
-        const setter = setters.find(p => !selected.has(p.id));
+        const setter = pickFrom(this.players, "setter", 1)[0];
         if (setter) {
             const preferredSetterPos = [1, 3, 6];
             const pos = preferredSetterPos.find(p => !lineup[p]);
@@ -155,15 +169,13 @@ export class Team {
         }
     
         // Assign up to 3 hitters
-        let hitterCount = 0;
+        const hitters = pickFrom(this.players, "hitter", 3);
         for (const hitter of hitters) {
             if (selected.has(hitter.id)) continue;
             const pos = [1, 3, 4, 6].find(p => !lineup[p]); // skip middle spots
             if (!pos) break;
             lineup[pos] = hitter;
             selected.add(hitter.id);
-            hitterCount++;
-            if (hitterCount >= 3) break;
         }
     
         // Fill remaining lineup spots with best available players
@@ -180,9 +192,6 @@ export class Team {
                 }
             }
         }
-        console.log("+++++++")
-        console.log(lineup)
-        console.log(this.players)
         this.lineup = lineup;
     }
 
@@ -190,10 +199,13 @@ export class Team {
         Object.values(this.lineup).forEach(player=> player.fatigue())
     }
 
+    // for rests between points
     applyRest(){
-        console.log("APPLYING DA REST")
-        console.log(this.players)
         this.players.forEach(player=> player.rest())
+    }
+
+    applyWeekRest(){
+        this.players.forEach(player=> player.restWeek())
     }
     
 
@@ -211,15 +223,20 @@ export class Team {
             name: this.name,
             playerIds: this.playerIds,
             id: this.id,
-            userTeam: this.userTeam
+            userTeam: this.userTeam,
+            lineupPreferences: this.lineupPreferences
         }
     }
 
     static rehydrate(jsonData: string): Team{
         const teamAttributes = JSON.parse(jsonData)
-		return new Team(
+		const team = new Team(
 			teamAttributes.name, teamAttributes.playerIds, teamAttributes.id, teamAttributes.userTeam
 		)
+        if (teamAttributes.lineupPreferences) {
+            team.lineupPreferences = teamAttributes.lineupPreferences;
+        }
+        return team;
     }
 
     static getUserTeam(teams: Record<string, Team>): Team{
